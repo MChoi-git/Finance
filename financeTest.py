@@ -15,20 +15,37 @@ from collections.abc import Mapping
 
 # Export to CSV helper function
 #   Received a filename and a Ticker, clears and writes a .csv on every data type listed in IMPORTANT_TICKER_TYPES
-#       -Currently only works to send Ticker.info to .csv, add functionality to send all ticker datatypes 
+#   -CSV maker now throws every pandas dataframe into a file
+
+''' ***DEPRECATED
 def CSV_maker(filename, ticker):
     with open(filename, 'w') as f:
     # Go through dataypes in Ticker obj
         for key in ticker.info.keys():
             f.write("%s,%s\n"%(key, ticker.info[key]))
-
     print("\n")
     return True
+'''
+
+
+# CSV output function
+def CSV_maker_df(ticker,ticker_string):
+    i = 0
+    # Gen expression to filter out garbage attributes
+    gen = (attr for attr in dir(ticker) if not callable(getattr(ticker, attr)) and not attr.startswith("__") and not attr.startswith("_"))
+    for attr in gen:
+        if isinstance(getattr(ticker,attr), pd.DataFrame):
+            print("%s -> %s put in CSV with extension: %i"%(ticker_string,attr,i))
+            # Saving dataframes with non-descript filenames temporarily
+            getattr(ticker,attr).to_csv(path_or_buf="%s_%i.csv"%(ticker_string,i))
+            i+=1
+
 
 # Convert dict to pandas dataframe
 #   -Probably doesn't work with dicts of mixed value types, idk I'm too tired to experiment rn
 def dict_to_df(dict):
     df = pd.DataFrame.from_dict(dict)
+
 
 # Definition of ticker data we want to look at 
 #   -Ticker contains A LOT of garbage vars we don't want
@@ -56,9 +73,8 @@ IMPORTANT_TICKER_TYPES = [
         'option_chain' # ('yyyy-mm-dd') -> must specify specific expiration
         ]
 
-# Definition of watched tickers
-# KO,^DJI,^IXIC,AAPL,AMZN,PEP,JNJ,BP,MSFT,XOM
 
+# Definition of watched tickers
 WATCHED_TICKERS = [
         'MSFT',
         '^DJI',
@@ -72,13 +88,16 @@ WATCHED_TICKERS = [
         'M'
         ]
 
+
 ############################################ Main ########################################
 ticker_objects = []
 ticker_filenames = []
 
+
 # Populate Ticker object list
 for ticker in WATCHED_TICKERS:
     ticker_objects.append(yf.Ticker(ticker))
+
 
 # Create plots for each Ticker
 '''
@@ -89,25 +108,31 @@ for ticker in ticker_objects:
     plt.show()
 '''
 
+
 # Record .csv output filenames
 for ticker in WATCHED_TICKERS:
     ticker_filenames.append("%s.csv" % (ticker))
-print(ticker_filenames)
 
+
+
+# Send pandas dataframe items to .csv
 msft = yf.Ticker("MSFT")
-print(msft.info)
+CSV_maker_df(msft,"msft")
+
 
 # Output each ticker to csv
-'''
+''' ***DEPRECATED
 for filename, ticker in zip(ticker_filenames, ticker_objects):
     if not CSV_maker(filename, ticker):
         print("CSV conversion failed: %s\n"%(filename))
 '''
 
+
+'''
 # Find important variable types
 for ele in IMPORTANT_TICKER_TYPES:
     exec("print(type(ticker_objects[0].%s))" %(ele))
-
+'''
 
 
 
