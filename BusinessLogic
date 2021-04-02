@@ -1,0 +1,7 @@
+Business logic ideas:
+	Independent ticker analyses
+		-Average return per {day, week, month, etc.}
+		-Variance
+		-Plotted distribution of returns
+			-Should look like a normal function that centers around
+			 avg. return

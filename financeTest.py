@@ -32,13 +32,13 @@ def CSV_maker(filename, ticker):
 def CSV_maker_df(ticker,ticker_string):
     i = 0
     # Gen expression to filter out garbage attributes
-    gen = (attr for attr in dir(ticker) if not callable(getattr(ticker, attr)) and not attr.startswith("__") and not attr.startswith("_"))
+    gen = (attr for attr in dir(ticker) if not callable(getattr(ticker, attr)) and not attr.startswith("__") and not attr.startswith("_") and 
+            isinstance(getattr(ticker,attr),pd.DataFrame))
     for attr in gen:
-        if isinstance(getattr(ticker,attr), pd.DataFrame):
-            print("%s -> %s put in CSV with extension: %i"%(ticker_string,attr,i))
+        print("%s -> %s put in CSV with extension: %i"%(ticker_string,attr,i))
             # Saving dataframes with non-descript filenames temporarily
-            getattr(ticker,attr).to_csv(path_or_buf="%s_%i.csv"%(ticker_string,i))
-            i+=1
+        getattr(ticker,attr).to_csv(path_or_buf="%s_%i.csv"%(ticker_string,i))
+        i+=1
 
 
 # Convert dict to pandas dataframe
@@ -99,6 +99,11 @@ for ticker in WATCHED_TICKERS:
     ticker_objects.append(yf.Ticker(ticker))
 
 
+# Record .csv output filenames
+for ticker in WATCHED_TICKERS:
+    ticker_filenames.append("%s.csv" % (ticker))
+
+
 # Create plots for each Ticker
 '''
 for ticker in ticker_objects:
@@ -109,15 +114,33 @@ for ticker in ticker_objects:
 '''
 
 
-# Record .csv output filenames
-for ticker in WATCHED_TICKERS:
-    ticker_filenames.append("%s.csv" % (ticker))
 
+def plotter(ticker, target_attr):
+    # Filter illegal target attributes
+    gen = (attr for attr in dir(ticker) if not callable(getattr(ticker, attr)) and not attr.startswith("__") and not attr.startswith("_") and attr 
+            == target_attr)
+    graph = sns.relplot(x='Date',y='Gross Profit',kin='line',data=getattr(ticker, gen)[6])
+   
 
+msft = yf.Ticker("MSFT")
+print('='*80 + '\nTesting dataframe accessors for Ticker: MSFT \n' + '='*80)
+print("\nRow index:")
+print(msft.quarterly_financials.index)
+print("\nColumn index:")
+print(msft.quarterly_financials.columns)
+print("\nRetrieving Net Income...")
+print(msft.quarterly_financials.loc['Net Income'])
+print("\nRetrieving Gross Profit...")
+print(msft.quarterly_financials.loc['Gross Profit'])
+print("\nPlotting Net Income and Gross Profit...")
+#graph = sns.relplot(x='Date',y='Gross Profit',kin='line',data=msft.quarterly_financials.loc['Net Income'])
+#plotter(msft, 'quarterly_financials')
+#plotter(msft, 'quarterly_financials')
+#graph.fig.autofmt_xfate()
+#plt.show()
 
 # Send pandas dataframe items to .csv
-msft = yf.Ticker("MSFT")
-CSV_maker_df(msft,"msft")
+#CSV_maker_df(msft,"msft")
 
 
 # Output each ticker to csv
