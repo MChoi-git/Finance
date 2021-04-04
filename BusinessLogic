@@ -5,3 +5,5 @@ Business logic ideas:
 		-Plotted distribution of returns
 			-Should look like a normal function that centers around
 			 avg. return
+		-Sort by P/E and price relative to 52 week low
+		

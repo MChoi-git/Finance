@@ -16,6 +16,11 @@ from collections.abc import Mapping
 # Export to CSV helper function
 #   Received a filename and a Ticker, clears and writes a .csv on every data type listed in IMPORTANT_TICKER_TYPES
 #   -CSV maker now throws every pandas dataframe into a file
+#   -Minimize polling on yahoo finance
+#       -Store and retrieve data mainly from csv (or db)
+#           -Create update function in order to update the csv or db
+#       -Narrow down specific ticker datatypes that we need instead of trying to handle everything
+
 
 ''' ***DEPRECATED
 def CSV_maker(filename, ticker):
@@ -41,10 +46,24 @@ def CSV_maker_df(ticker,ticker_string):
         i+=1
 
 
-# Convert dict to pandas dataframe
-#   -Probably doesn't work with dicts of mixed value types, idk I'm too tired to experiment rn
-def dict_to_df(dict):
-    df = pd.DataFrame.from_dict(dict)
+# Read from CSV
+def update_Tickers(ticker_list, filename, time_period):
+    df_list = list()
+    for ticker in ticker_list:
+        data = yf.download(ticker, group_by='Ticker', period=time_period)
+        data['ticker'] = ticker
+        df_list.append(data)
+    df = pd.concat(df_list)
+    df.to_csv(filename)
+    return df
+
+
+# Plot specific ticker data 
+def plotter(ticker, target_attr):
+    # Filter illegal target attributes
+    gen = (attr for attr in dir(ticker) if not callable(getattr(ticker, attr)) and not attr.startswith("__") and not attr.startswith("_") and attr 
+            == target_attr)
+    graph = sns.relplot(x='Date',y='Gross Profit',kin='line',data=getattr(ticker, gen)[6])
 
 
 # Definition of ticker data we want to look at 
@@ -79,7 +98,8 @@ WATCHED_TICKERS = [
         'MSFT',
         '^DJI',
         '^IXIC',
-        'AAPL',
+        'AAPL']
+'''       
         'AMZN',
         'PEP',
         'JNJ',
@@ -87,9 +107,9 @@ WATCHED_TICKERS = [
         'XOM',
         'M'
         ]
+'''
 
-
-############################################ Main ########################################
+############################################ Setup ticker lists ########################################
 ticker_objects = []
 ticker_filenames = []
 
@@ -103,6 +123,10 @@ for ticker in WATCHED_TICKERS:
 for ticker in WATCHED_TICKERS:
     ticker_filenames.append("%s.csv" % (ticker))
 
+########################################################################################################    
+
+
+########################################### Main #######################################################
 
 # Create plots for each Ticker
 '''
@@ -113,15 +137,8 @@ for ticker in ticker_objects:
     plt.show()
 '''
 
-
-
-def plotter(ticker, target_attr):
-    # Filter illegal target attributes
-    gen = (attr for attr in dir(ticker) if not callable(getattr(ticker, attr)) and not attr.startswith("__") and not attr.startswith("_") and attr 
-            == target_attr)
-    graph = sns.relplot(x='Date',y='Gross Profit',kin='line',data=getattr(ticker, gen)[6])
-   
-
+  
+'''
 msft = yf.Ticker("MSFT")
 print('='*80 + '\nTesting dataframe accessors for Ticker: MSFT \n' + '='*80)
 print("\nRow index:")
@@ -129,10 +146,20 @@ print(msft.quarterly_financials.index)
 print("\nColumn index:")
 print(msft.quarterly_financials.columns)
 print("\nRetrieving Net Income...")
+print("Type of data:")
+print(type(msft.quarterly_financials.loc['Net Income']))
+print(msft.quarterly_financials.loc['Net Income'])
 print(msft.quarterly_financials.loc['Net Income'])
 print("\nRetrieving Gross Profit...")
 print(msft.quarterly_financials.loc['Gross Profit'])
-print("\nPlotting Net Income and Gross Profit...")
+#print("\nPlotting Net Income and Gross Profit...")
+print("Testing completed.")
+'''
+
+
+all_ticker_df = update_Tickers(WATCHED_TICKERS, 'all_watched_ticker_data.csv', 'max')
+
+
 #graph = sns.relplot(x='Date',y='Gross Profit',kin='line',data=msft.quarterly_financials.loc['Net Income'])
 #plotter(msft, 'quarterly_financials')
 #plotter(msft, 'quarterly_financials')
@@ -142,21 +169,12 @@ print("\nPlotting Net Income and Gross Profit...")
 # Send pandas dataframe items to .csv
 #CSV_maker_df(msft,"msft")
 
-
-# Output each ticker to csv
-''' ***DEPRECATED
-for filename, ticker in zip(ticker_filenames, ticker_objects):
-    if not CSV_maker(filename, ticker):
-        print("CSV conversion failed: %s\n"%(filename))
-'''
-
-
 '''
 # Find important variable types
-for ele in IMPORTANT_TICKER_TYPES:
-    exec("print(type(ticker_objects[0].%s))" %(ele))
+gen = (attr for attr in dir(msft) if not callable(getattr(msft, attr)) and not attr.startswith("__") and not attr.startswith("_") and isinstance(getattr(msft,attr),pd.DataFrame))
+for attr in gen:
+    print(getattr(msft,attr))
 '''
-
 
 
 
