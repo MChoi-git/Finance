@@ -38,12 +38,19 @@ def CSV_maker_df(ticker,ticker_string):
     i = 0
     # Gen expression to filter out garbage attributes
     gen = (attr for attr in dir(ticker) if not callable(getattr(ticker, attr)) and not attr.startswith("__") and not attr.startswith("_") and 
-            isinstance(getattr(ticker,attr),pd.DataFrame))
+            (isinstance(getattr(ticker,attr),pd.DataFrame) or isinstance(getattr(ticker,attr),dict)))
     for attr in gen:
-        print("%s -> %s put in CSV with extension: %i"%(ticker_string,attr,i))
+        if isinstance(getattr(ticker,attr),pd.DataFrame):
+            print("%s -> %s put in CSV with extension: %i"%(ticker_string,attr,i))
             # Saving dataframes with non-descript filenames temporarily
-        getattr(ticker,attr).to_csv(path_or_buf="%s_%i.csv"%(ticker_string,i))
-        i+=1
+            getattr(ticker,attr).to_csv(path_or_buf="%s_%i.csv"%(ticker_string,i))
+            i+=1
+        if isinstance(getattr(ticker,attr),dict):
+            print("%s -> %s put in CSV with extension: %i"%(ticker_string,attr,i))
+            with open("%s_%i.csv"%(ticker_string,i),'w') as f:
+                for key in getattr(ticker,attr).keys() :
+                    f.write("%s,%s\n"%(key,getattr(ticker,attr)[key]))
+            i+=1
 
 
 # Read from CSV
@@ -138,8 +145,13 @@ for ticker in ticker_objects:
 '''
 
   
-'''
+
 msft = yf.Ticker("MSFT")
+'''
+aapl = yf.Ticker("AAPL")
+jnj = yf.Ticker("JNJ")
+pep = yf.Ticker("PEP")
+
 print('='*80 + '\nTesting dataframe accessors for Ticker: MSFT \n' + '='*80)
 print("\nRow index:")
 print(msft.quarterly_financials.index)
@@ -153,11 +165,31 @@ print(msft.quarterly_financials.loc['Net Income'])
 print("\nRetrieving Gross Profit...")
 print(msft.quarterly_financials.loc['Gross Profit'])
 #print("\nPlotting Net Income and Gross Profit...")
+print("\nRetrieving 52 week high...")
+print(msft.info.get('regularMarketDayLow'))
+print("\nRetrieving P/E ratio...")
+print(msft.info.get('trailingPE'))
+print("Testing completed.")
+
+print("\nTesting multi-ticker 52w low vs. PE...")
+print("\nRetrieving MSFT details...")
+print("MSFT 52w low:")
+print(msft.info.get('regularMarketDayLow'))
+print(msft.info.get('trailingPE'))
+print("AAPL 52w low:")
+print(aapl.info.get('regularMarketDayLow'))
+print(aapl.info.get('trailingPE'))
+print("JNJ 52w low:")
+print(jnj.info.get('regularMarketDayLow'))
+print(jnj.info.get('trailingPE'))
+print("PEP 52w low:")
+print(pep.info.get('regularMarketDayLow'))
+print(pep.info.get('trailingPE'))
 print("Testing completed.")
 '''
 
 
-all_ticker_df = update_Tickers(WATCHED_TICKERS, 'all_watched_ticker_data.csv', 'max')
+#all_ticker_df = update_Tickers(WATCHED_TICKERS, 'all_watched_ticker_data.csv', 'max')
 
 
 #graph = sns.relplot(x='Date',y='Gross Profit',kin='line',data=msft.quarterly_financials.loc['Net Income'])
@@ -167,7 +199,7 @@ all_ticker_df = update_Tickers(WATCHED_TICKERS, 'all_watched_ticker_data.csv', '
 #plt.show()
 
 # Send pandas dataframe items to .csv
-#CSV_maker_df(msft,"msft")
+CSV_maker_df(msft,"msft")
 
 '''
 # Find important variable types
