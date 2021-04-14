@@ -147,7 +147,6 @@ for ticker in ticker_objects:
   
 
 msft = yf.Ticker("MSFT")
-'''
 aapl = yf.Ticker("AAPL")
 jnj = yf.Ticker("JNJ")
 pep = yf.Ticker("PEP")
@@ -186,7 +185,6 @@ print("PEP 52w low:")
 print(pep.info.get('regularMarketDayLow'))
 print(pep.info.get('trailingPE'))
 print("Testing completed.")
-'''
 
 
 #all_ticker_df = update_Tickers(WATCHED_TICKERS, 'all_watched_ticker_data.csv', 'max')
