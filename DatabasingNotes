@@ -1,0 +1,33 @@
+Database design basics
+-From microsoft site: https://support.microsoft.com/en-us/office/database-design-basics-eb2159cf-1e30-401a-8084-bd4f9c9ca1f5
+
+Terms to know:
+-Table: Rows and columns 
+	-Rows -> Record
+	-Column -> field
+
+Good db design?
+-Duplicate information is BAD
+	-Wastes space and increases error %
+-Correctness & completeness is important
+-Therefore, good design:
+	1. Divides info into subject-based tables to reduce redundancy
+	2. Provides db with the info it requires to join the information in the tables together
+	   as needed
+	3. Helps support and ensure the accuracy and integrity of your information
+	4. Accomodates your data processing and reporting needs
+Design process:
+	1. Determine the purpose of the db
+	2. Find and organize the info req'd
+		-{id, ticker name, EPS, previous day close, P/E, forward P/E, 52w low}
+	3. Divide the info into tables
+		-{tickers, ticker financials}
+	4. Turn info items into columns
+		-root:{id, ticker name}
+		-info(AKA financials):{id,EPS, previous day close, 52w low}
+		-ratios:{id,P/E, Forward P/E} (forward P/E tbd)
+	5. Specify primary keys
+		-primary key: id
+	6. Set up the table relationships
+	7. Refine the design
+	8. Apply the normalization rules
