@@ -5,6 +5,7 @@ from get_all_tickers import get_tickers as gt
 import os
 import pandas as pd
 import datetime
+from datetime import date,timedelta
 import numpy as np
 
 #Initializes the root db with columns of ticker int ids, ticker names, and last updated time
@@ -27,6 +28,7 @@ def init_root_db(tickerList):
 def init_info_db(key,tickerList):
     idList = []
     epsList = []
+    lastPriceList = []
     rootData = pd.read_csv(filepath_or_buffer="Root_Database.csv")
     print("Info db ids being matched...")
     
@@ -36,15 +38,23 @@ def init_info_db(key,tickerList):
     print("Info db eps being created...")
     #5 API calls per min
     i = 0
-    for ticker in rootData.ticker:
+    '''for ticker in rootData.ticker:
         if i == 4:
             break
         if ticker in tickerList:
             epsList.append(getFinancial(key,ticker,'earningsPerDilutedShare'))
-        i+=1
+        i+=1'''
     print(epsList)
     print("Info db eps have been successfully created.")
     print("Info db previous day close being created...")
+    #Additional 5 api calls per min
+    i = 0
+    for ticker in rootData.ticker:
+        if i == 4:
+            break
+        if ticker in tickerList:
+            lastPriceList.append(getDailyOpenClose(key,ticker,0))
+        i+=1
     print("Info db previous day close have been successfully created.")
     print("Info db 52w low being created...")
     print("Info db 52w low have been successfully created.")
@@ -61,7 +71,42 @@ def getFinancial(key,ticker,infoSpec):
         except:
             print(f"No {infoSpec}.")
             return "DNE"
+    return 0
 
+#Takes a ticker name string and status int {0=open,1=close} and returns the open/close price
+def getDailyOpenClose(key,ticker,status):
+    #Note that there is a delay between recordings of daily close, ie. find close from previous day not day of
+    #API CALL
+    with RESTClient(key) as client:
+        resp = client.stocks_equities_daily_open_close(ticker,convertDateTimeToString(datetime.date.today() - timedelta(days=1)))
+        if status:
+
+            try:
+                print(f"{ticker} {status} on: {resp.from_} closed at {resp.close}")
+                return resp.close
+            except:
+                print(f"No {status} for {ticker}")
+                return "DNE"
+        else:
+            try:
+                print(f"{ticker} {status} on: {resp.from_} opened at {resp.open}")
+                return resp.close
+            except:
+                print(f"No {status} for {ticker}")
+                return "DNE"
+    return 0
+
+def convertDateTimeToString(inDate):
+    if inDate.month < 10:
+        month = '0{0}'.format(inDate.month)
+    else:
+        month = inDate.month
+    if inDate.day < 10:
+        day = '0{0}'.format(inDate.day)
+    else:
+        day = inDate.day
+    dateString = '{0}-{1}-{2}'.format(inDate.year,month,day)
+    return dateString
 
 def main():
     key = 'PjeqU9zauMH9o49WYWurfZslqfY8HpF7'
@@ -70,13 +115,10 @@ def main():
         
         ''' This block is for reference purposes only
         # Note that Q results are off by 1 fiscal year, bug currently being worked on
-        
-        #resp = client.stocks_equities_daily_open_close("AAPL","2018-03-02")
-        #print(f"on: {resp.from_} Apple opened at {resp.open} and closed at {resp.close}")
-        '''
+        resp = client.stocks_equities_daily_open_close("AAPL","2018-03-02")
+        print(f"on: {resp.from_} Apple opened at {resp.open} and closed at {resp.close}")
         resp = client.reference_stock_financials("MSFT",limit=1,type='Q')
         print(f"MSFT market cap is {resp.results[0].get('marketCapitalization')} as reported on {resp.results[0].get('reportPeriod')}.")
-        '''
         custom_limit=100
         resp = client.reference_stock_financials("MSFT",limit=100,type='Q')
         for i in range(custom_limit):
