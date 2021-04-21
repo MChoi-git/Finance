@@ -48,7 +48,6 @@ def init_info_db(key,tickerList):
         if ticker in tickerList:
             epsList.append(getFinancial(key,ticker,'earningsPerDilutedShare'))
         i+=1
-    print(epsList)
     print("Info db eps have been successfully created.")
     print("Info db previous day close being created...")
     #Additional 5 api calls per min
@@ -58,22 +57,12 @@ def init_info_db(key,tickerList):
         if i == 4:
             break
         if ticker in tickerList:
-            prevClose = getDailyOpenClose(key,ticker,1)
-            lastPriceList.append(prevClose[0])
+            resultList = getDailyOpenClose(key,ticker,1)
+            lastPriceList.append(resultList[0])
+            yearLowList.append(resultList[1])
         i+=1
-    print(lastPriceList)
     print("Info db previous day close have been successfully created.")
     print("Info db 52w low being created...")
-    i = 0
-    time.sleep(55)
-    for ticker in rootData.ticker:
-        if i == 4:
-            break
-        if ticker in tickerList:
-            yearLow = getDailyOpenClose(key,ticker,1)
-            yearLowList.append(yearLow[1])
-        i+=1
-    print(yearLowList)
     print("Info db 52w low have been successfully created.")
     print('='*50)
     data = list(zip(idList,epsList,lastPriceList,yearLowList))
