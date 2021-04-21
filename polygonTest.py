@@ -13,6 +13,7 @@ import time
 def init_root_db(tickerList):
     idList = []
     dateList = []
+    print('='*50)
     print("Root db ids being created...")
     for i in range(len(tickerList)):
         idList.append(i)
@@ -21,6 +22,7 @@ def init_root_db(tickerList):
     for i in range(len(tickerList)):
         dateList.append(datetime.date.today())
     print("Root db dates have been successfully created.")
+    print('='*50)
     data = list(zip(idList,tickerList,dateList))
     df = pd.DataFrame(data,columns=['id','ticker','lastUpdated'])
     df.to_csv(path_or_buf="Root_Database.csv")
@@ -32,8 +34,8 @@ def init_info_db(key,tickerList):
     lastPriceList = []
     yearLowList=[]
     rootData = pd.read_csv(filepath_or_buffer="Root_Database.csv")
+    print('='*50)
     print("Info db ids being matched...")
-    
     for index in rootData.index:
         idList.append(rootData.loc[index,'id'])
     print("Info db ids have been successfully matched.")
@@ -56,7 +58,8 @@ def init_info_db(key,tickerList):
         if i == 4:
             break
         if ticker in tickerList:
-            lastPriceList.append(getDailyOpenClose(key,ticker,1))
+            prevClose = getDailyOpenClose(key,ticker,1)
+            lastPriceList.append(prevClose[0])
         i+=1
     print(lastPriceList)
     print("Info db previous day close have been successfully created.")
@@ -67,11 +70,15 @@ def init_info_db(key,tickerList):
         if i == 4:
             break
         if ticker in tickerList:
-            yearLowList.append(getDailyOpenClose(key,ticker,2))
+            yearLow = getDailyOpenClose(key,ticker,1)
+            yearLowList.append(yearLow[1])
         i+=1
     print(yearLowList)
     print("Info db 52w low have been successfully created.")
+    print('='*50)
     data = list(zip(idList,epsList,lastPriceList,yearLowList))
+    df = pd.DataFrame(data,columns=['id','eps','prevClose','yearLow'])
+    df.to_csv(path_or_buf="Info_Database.csv")
     print(data)
     return 1
 
@@ -93,33 +100,31 @@ def getDailyOpenClose(key,ticker,status):
     #Note that there is a delay between recordings of daily close, ie. find close from previous day not day of
     #API CALL
     with RESTClient(key) as client:
-        if status == 1:
+        if status == 0:
             resp = client.stocks_equities_daily_open_close(ticker,convertDateTimeToString(datetime.date.today() - timedelta(days=1)))
             try:
-                print(f"{ticker} {status} on: {resp.from_} closed at {resp.close}")
+                print(f"{ticker} {status} on: {resp.from_} opened at {resp.open}.")
                 return resp.close
             except:
                 print(f"No {status} for {ticker}")
                 return "DNE"
-        elif status == 0:
-            resp = client.stocks_equities_daily_open_close(ticker,convertDateTimeToString(datetime.date.today() - timedelta(days=1)))
-            try:
-                print(f"{ticker} {status} on: {resp.from_} opened at {resp.open}")
-                return resp.close
-            except:
-                print(f"No {status} for {ticker}")
-                return "DNE"
-        elif status == 2:
+        elif status == 1:
             refLow = []
+            resultList = []
             from_ = convertDateTimeToString(datetime.date.today() - timedelta(days=365))
             to = convertDateTimeToString(datetime.date.today() - timedelta(days=1))
             resp = client.stocks_equities_aggregates(ticker,1,"day",from_,to)
             try:
                 for info in resp.results:
                     refLow.append(info.get("l"))
-                realLow = min(refLow)
-                print(f"{ticker} {status} 52 week low is {realLow}")
-                return realLow
+                #resultList{0=prev day close, 1=52wlow}
+                prevClose = resp.results[len(resp.results)-1].get("c")
+                yearLow = min(refLow)
+                resultList.append(prevClose)
+                resultList.append(yearLow)
+                print(f"{ticker} status: {status}| on: {to}  closed at {str(prevClose)}.")
+                print(f"{ticker} status: {status}| 52 week low is {str(yearLow)}.")
+                return resultList
             except:
                 print(f"No {status} for {ticker}")
                 return "DNE"
@@ -183,7 +188,7 @@ def main():
                 print("Root DB initialization has failed.")
         
         #Initialize the info db
-        if os.path.isfile("Info_Database.csv"):
+        if os.path.isfile("Info_Database1.csv"):
             print("Info DB found, aborting init operation.")
         else:
             if(init_info_db(key,list_of_all_tickers)):
