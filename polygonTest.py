@@ -7,6 +7,7 @@ import pandas as pd
 import datetime
 from datetime import date,timedelta
 import numpy as np
+import time
 
 #Initializes the root db with columns of ticker int ids, ticker names, and last updated time
 def init_root_db(tickerList):
@@ -29,6 +30,7 @@ def init_info_db(key,tickerList):
     idList = []
     epsList = []
     lastPriceList = []
+    yearLowList=[]
     rootData = pd.read_csv(filepath_or_buffer="Root_Database.csv")
     print("Info db ids being matched...")
     
@@ -38,26 +40,39 @@ def init_info_db(key,tickerList):
     print("Info db eps being created...")
     #5 API calls per min
     i = 0
-    '''for ticker in rootData.ticker:
+    for ticker in rootData.ticker:
         if i == 4:
             break
         if ticker in tickerList:
             epsList.append(getFinancial(key,ticker,'earningsPerDilutedShare'))
-        i+=1'''
+        i+=1
     print(epsList)
     print("Info db eps have been successfully created.")
     print("Info db previous day close being created...")
     #Additional 5 api calls per min
     i = 0
+    time.sleep(50)
     for ticker in rootData.ticker:
         if i == 4:
             break
         if ticker in tickerList:
-            lastPriceList.append(getDailyOpenClose(key,ticker,0))
+            lastPriceList.append(getDailyOpenClose(key,ticker,1))
         i+=1
+    print(lastPriceList)
     print("Info db previous day close have been successfully created.")
     print("Info db 52w low being created...")
+    i = 0
+    time.sleep(55)
+    for ticker in rootData.ticker:
+        if i == 4:
+            break
+        if ticker in tickerList:
+            yearLowList.append(getDailyOpenClose(key,ticker,2))
+        i+=1
+    print(yearLowList)
     print("Info db 52w low have been successfully created.")
+    data = list(zip(idList,epsList,lastPriceList,yearLowList))
+    print(data)
     return 1
 
 #Takes a ticker name string and the financial spec string {eps,prev day close, 52w low, etc.} and returns the data point
@@ -73,27 +88,42 @@ def getFinancial(key,ticker,infoSpec):
             return "DNE"
     return 0
 
-#Takes a ticker name string and status int {0=open,1=close} and returns the open/close price
+#Takes a ticker name string and status int {0=open,1=close,2=52wlow} and returns the open/close price
 def getDailyOpenClose(key,ticker,status):
     #Note that there is a delay between recordings of daily close, ie. find close from previous day not day of
     #API CALL
     with RESTClient(key) as client:
-        resp = client.stocks_equities_daily_open_close(ticker,convertDateTimeToString(datetime.date.today() - timedelta(days=1)))
-        if status:
-
+        if status == 1:
+            resp = client.stocks_equities_daily_open_close(ticker,convertDateTimeToString(datetime.date.today() - timedelta(days=1)))
             try:
                 print(f"{ticker} {status} on: {resp.from_} closed at {resp.close}")
                 return resp.close
             except:
                 print(f"No {status} for {ticker}")
                 return "DNE"
-        else:
+        elif status == 0:
+            resp = client.stocks_equities_daily_open_close(ticker,convertDateTimeToString(datetime.date.today() - timedelta(days=1)))
             try:
                 print(f"{ticker} {status} on: {resp.from_} opened at {resp.open}")
                 return resp.close
             except:
                 print(f"No {status} for {ticker}")
                 return "DNE"
+        elif status == 2:
+            refLow = []
+            from_ = convertDateTimeToString(datetime.date.today() - timedelta(days=365))
+            to = convertDateTimeToString(datetime.date.today() - timedelta(days=1))
+            resp = client.stocks_equities_aggregates(ticker,1,"day",from_,to)
+            try:
+                for info in resp.results:
+                    refLow.append(info.get("l"))
+                realLow = min(refLow)
+                print(f"{ticker} {status} 52 week low is {realLow}")
+                return realLow
+            except:
+                print(f"No {status} for {ticker}")
+                return "DNE"
+
     return 0
 
 def convertDateTimeToString(inDate):
