@@ -10,8 +10,9 @@ from collections.abc import Mapping
 # Notes:
 #   See https://github.com/ranaroussi/yfinance
 #   See https://aroussi.com/post/python-yahoo-finance
-#   Ticker.info is <dict> where keys are strings but values are mixed
-#       -Handle this as a special case
+#   -This file is in its final form
+#   -There will probably be no more changes, although I may decide to refactor this at a later date
+#   -This file will only be used as a reference for later projects (probably not, yahoo finance scraping sucks)
 
 # Export to CSV helper function
 #   Received a filename and a Ticker, clears and writes a .csv on every data type listed in IMPORTANT_TICKER_TYPES

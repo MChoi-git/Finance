@@ -1,4 +1,8 @@
 # This is a test file to practice polygon.io REST API
+# Notes:
+#   -This file is in its final form, was only used to play around with flat-file databasing and polygon.io's REST API for securities
+#   -Any edits to this file will be for the purposes of code refactoring, with limited functionality change if any
+#   -This file will be used as a reference for future projects
 
 from polygon import RESTClient
 from get_all_tickers import get_tickers as gt

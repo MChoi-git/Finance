@@ -23,6 +23,11 @@
 #   -Begin Price_History DB
 #   -Whole databasing service assumes no ticker is deleted/added for now
 #       -Dynamic database editing is too complicated and out of scope for now
+# Notes: 
+#   -This file is in its final format, no more changes will happen
+#   -This will only be used a reference for future projects (probably not, yf sucks)
+
+
 
 import pandas as pd
 import yfinance as yf
