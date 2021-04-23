@@ -31,3 +31,24 @@ Design process:
 	6. Set up the table relationships
 	7. Refine the design
 	8. Apply the normalization rules
+Design notes:
+	-"Garbage in, garbage out"
+	-Use primary key-foreign key relationships
+	-Remember to make use of backups 
+	-Avoid deleting data, instead choose to activate or deactivate data
+		-Can also archive and update a record with changes
+	-Consider security , ie. don't use root for apps 
+	-Compartmentalize data (into "screens") and put each compartment into a table
+	-Do not store duplicate data
+	-Make sure each table makes sense for the application
+	-Follow normalization rules:
+		1. Elminate repear info, create separate tables for relational data, use primary keys to identify each record
+		2. Create separate tables for each set of relational data, use foreign keys to link related tables
+		3. Eliminate fields that don't relate to the primary key
+	-Stick to a standard naming convention (ie. lower-case with underscores)
+	-Look into user variables and views
+
+
+Actual design to be implemented:
+	Table 1: Root 
+		-Houses metadata (unique ticker id, ticker, company name, 
