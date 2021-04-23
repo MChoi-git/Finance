@@ -51,4 +51,49 @@ Design notes:
 
 Actual design to be implemented:
 	Table 1: Root 
-		-Houses metadata (unique ticker id, ticker, company name, 
+==============================
+| id | ticker | company_name |
+=============================
+|    |        |              |
+|    |        |              |
+=============================
+id<SMALLINT>: Primary key
+ticker<VARCHAR>: Stores equity/security ticker
+company_name<VARCHAR>: Stores the actual company name
+
+	Table 2: OHLC
+-Displays the OHLC history for all tickers
+==================================================
+| id | date | open | high | low | close | volume |
+==================================================
+|    |      |      |      |     |       |        |
+|    |      |      |      |     |       |        |
+=================================================
+id<SMALLINT>: Foreign key to identify equity/security
+date<DATE>: Day the price information was updated
+open,high,low,close<MEDIUMINT>: OHLC for equity/security
+volume<BIGINT>: Daily volume
+
+	Table 3: Financials
+-Contains all the non-calculated financial data for all tickers
+-The information contained here depends on the business thesis for the trades
+-This db will contain some general metrics which may or may not be useful for the business theses
+==============================================================================================================================================================
+| id | date |  debt_to_equity_ratio | dividend_yield | earnings_per_diluted_share | gross_profit | net_income | price_to_earnings_ratio | revenues_usd | ... |
+==============================================================================================================================================================
+|    |      |                       |                |                            |              |            |                         |              |     |
+|    |      |                       |                |                            |              |            |                         |              |     |
+==============================================================================================================================================================
+id<SMALLINT>: Foreign key to identify equity/security
+date<DATE>: Day the price information was updated
+debt_to_equity_ratio<FLOAT>
+dividend_yield<FLOAT>
+earnings_per_diluted_share<FLOAT>
+gross_profit<BIGINT>
+net_income<BIGINT>
+price_to_earnings_ratio<FLOAT>
+revenues_usd<BIGINT>
+
+
+
+
