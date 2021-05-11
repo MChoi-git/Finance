@@ -119,32 +119,32 @@ metadata.create_all(engine)
 Base = declarative_base()
 
 #Declaring mapped classes
-class User(Base):
-    __tablename__ = 'user_account'
+class User2(Base):
+    __tablename__ = 'user_account2'
 
     id = Column(Integer, primary_key = True)
     name = Column(String(30))
     fullname = Column(String(30))
     
-    addresses = relationship("Address", back_populates="user")
+    addresses2 = relationship("Address2", back_populates="user2")
 
     def __repr__(self):
         return f"User(id={self.id!r}, name={self.name!r}, fullname={self.fullname!r})"
 
-class Address(Base):
-    __tablename__ = 'address'
+class Address2(Base):
+    __tablename__ = 'address2'
 
     id = Column(Integer, primary_key=True)
     email_address = Column(String(30), nullable=False)
-    user_id = Column(Integer, ForeignKey('user_account.id'))
+    user_id = Column(Integer, ForeignKey('user_account2.id'))
     
-    user = relationship("User", back_populates="addresses")
+    user2 = relationship("User2", back_populates="addresses2")
 
     def __repr__(self):
         return f"Address(id={self.id!r}, email_address={self.email_address!r})"
 
 Base.metadata.create_all(engine)
-
+'''
 #Data manipulation with ORM
 squidward = User(name='squidward', fullname="Squidward Tentacles")
 krabs = User(name="ehkrabs", fullname="Eugene H. Krabs")
@@ -169,4 +169,5 @@ print(some_squidward is squidward)
 #print(sandy) prints the sandy row
 #sandy.fullname = "Sandy Squirrel"
 #sandy in session.dirty (True)
+'''
 
