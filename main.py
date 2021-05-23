@@ -1,9 +1,13 @@
 #Creates primary, ohlc, and financials databases in docker container
 
+#Notes:
+#   -Figure out way to just call gui.py instead of having to write setup script in main
+
 #Import 
 import sqlalchemy as db
 import time
 import sys
+'''
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import MetaData
@@ -13,7 +17,12 @@ from sqlalchemy.orm import registry
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import insert
+'''
+from sqlalchemy import *
+from sqlalchemy.orm import *
 import getpass
+from gui import *
+from tkinter import *
 
 #Set config for connection to docker
 config = {
@@ -31,7 +40,7 @@ db_name = config.get('database')
 
 connection_str = f'mysql+pymysql://{db_user}:{db_pwd}@{db_host}:{db_port}/{db_name}'
 
-engine = db.create_engine(connection_str)
+engine = create_engine(connection_str)
 connection = engine.connect()
 
 Base = declarative_base()
@@ -92,7 +101,13 @@ class Financials(Base):
 #Create the schema
 Base.metadata.create_all(engine)
 
+
+# ****** MERGE ******
 #Launch gui
+loginGuiRoot = Tk()
+loginGui = Login(loginGuiRoot)
+loginGuiRoot.geometry=('500x200')
+loginGuiRoot.mainloop()
 
 #Check user credentials
 userCred = input("Enter username: ")
@@ -102,15 +117,17 @@ if(pwdCred == db_pwd and userCred == db_user):
 else:
     print("Invalid login credentials. Exiting program.")
     sys.exit()
+# ****** MERGE ******
 
 #Create a session
-Session = sessionmaker(bind=engine)
+#Session = sessionmaker(bind=engine)
 
 #Prompt for commands
 strPrompt = input("What would you like to do? Press help to browse all commands.")
 args = split(strip(strPrompt))
 print("User selected to do: " + str(args))
 
+'''
 #Print the help information
 if(args[0] == "help"):
 
@@ -132,4 +149,5 @@ elif(args[0] == "update"):
 elif(args[0] == "exit"):
     print("Exiting program. Goodbye.")
     sys.exit()
+'''
 
