@@ -21,7 +21,7 @@ from sqlalchemy import insert
 from sqlalchemy import *
 from sqlalchemy.orm import *
 import getpass
-from gui import *
+import gui
 from tkinter import *
 
 #Set config for connection to docker
@@ -104,19 +104,13 @@ Base.metadata.create_all(engine)
 
 # ****** MERGE ******
 #Launch gui
-loginGuiRoot = Tk()
-loginGui = Login(loginGuiRoot)
-loginGuiRoot.geometry=('500x200')
-loginGuiRoot.mainloop()
-
-#Check user credentials
-userCred = input("Enter username: ")
-pwdCred = getpass.getpass(prompt="Enter password: ")
-if(pwdCred == db_pwd and userCred == db_user):
-    print("Login successful. Welcome.")
+loginTry = gui.startLogin(db_user, db_pwd)
+if loginTry:
+    print("MAIN:Login successful. Welcome.")
 else:
-    print("Invalid login credentials. Exiting program.")
+    print("MAIN:Invalid login credentials. Exiting program.")
     sys.exit()
+
 # ****** MERGE ******
 
 #Create a session
