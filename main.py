@@ -102,8 +102,7 @@ class Financials(Base):
 Base.metadata.create_all(engine)
 
 
-# ****** MERGE ******
-#Launch gui
+#Launch login gui and authenticate user cred
 loginTry = gui.startLogin(db_user, db_pwd)
 if loginTry:
     print("MAIN:Login successful. Welcome.")
@@ -111,7 +110,6 @@ else:
     print("MAIN:Invalid login credentials. Exiting program.")
     sys.exit()
 
-# ****** MERGE ******
 
 #Create a session
 #Session = sessionmaker(bind=engine)
