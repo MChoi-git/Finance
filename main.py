@@ -22,6 +22,7 @@ from sqlalchemy import *
 from sqlalchemy.orm import *
 import getpass
 import gui
+import transactionGui
 from tkinter import *
 
 #Set config for connection to docker
@@ -110,14 +111,14 @@ else:
     print("MAIN:Invalid login credentials. Exiting program.")
     sys.exit()
 
+#Launch transaction gui if login successful
+if loginTry:
+    #Start transaction gui
+    transactionGui.transactionWindow()
 
 #Create a session
 #Session = sessionmaker(bind=engine)
 
-#Prompt for commands
-strPrompt = input("What would you like to do? Press help to browse all commands.")
-args = split(strip(strPrompt))
-print("User selected to do: " + str(args))
 
 '''
 #Print the help information

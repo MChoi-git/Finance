@@ -18,6 +18,8 @@ def startLogin(realUser, realPwd):
                 close()
             else:
                 print("GUI:Login unsuccessful. Please try again.")
+    def enter(event=None):
+        mouseClick()
 
     #Login window initialization
     class Login:
@@ -43,11 +45,11 @@ def startLogin(realUser, realPwd):
             self.loginButton.place(x=40,y=140)
             self.usernameInput = Entry(master, width=30, textvariable = self.userInput)
             self.usernameInput.place(x=110, y=60)
-            self.passwordInput = Entry(master, width=30, textvariable = self.pwdInput)  
+            self.passwordInput = Entry(master, width=30, textvariable = self.pwdInput,show="*")  
             self.passwordInput.place(x=110, y=100)
             
             #Event bindings
-            #self.loginButton.bind("<Button>", mouseClick)   
+            self.loginButton.bind("<Return>",enter)   
     
     #Start the window loop
     root = Tk()
