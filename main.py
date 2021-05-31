@@ -30,7 +30,7 @@ config = {
         'host': 'localhost',
         'port': 3306,
         'user': 'root',
-        'password': 'Stanleymug1!',
+        'password': 'tuna123',
         'database': 'securities'
         }
 db_user = config.get('user')

@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import ttk
 import time
 import datetime
+import sessionExecutor
 
 #This file is big and chunky, refactor to use enum+loops you fucking monkey
 
@@ -10,21 +11,25 @@ def transactionWindow():
     def closeClicked():
         #Close the program
         root.destroy()
-    def helpClicked():
+    def helpClicked(obj):
         #Print help information
         print("help")
-    def addClicked():
+    def addClicked(argsraw):
         #Add an entry
-        print("add")
-    def removeClicked():
+        args = ['add'] + argsraw
+        sessionExecutor.transactionExec(args)
+    def removeClicked(argsraw):
         #Remove an entry
-        print("remove")
-    def populateClicked():
+        args = ['remove'] + argsraw
+        sessionExecutor.transactionExec(args)
+    def populateClicked(argsraw):
         #Populate db from csv
-        print("populate")
-    def updateClicked():
+        args = ['populate'] + argsraw
+        sessionExecutor.transactionExec(args)
+    def updateClicked(argsraw):
         #Add entries to db
-        print("update")
+        args = ['update'] + argsraw
+        sessionExecutor.transactionExec(args)
     class TransactionWindow:
         def __init__(self,master):
             #Initialize tkinter
@@ -56,7 +61,25 @@ def transactionWindow():
             self.filename = StringVar(master, '')
 
             #update func
-            
+            self.args = [
+                    self.ticker,
+                    self.company_name,
+                    self.date,
+                    self.open,
+                    self.high,
+                    self.low,
+                    self.close,
+                    self.volume,
+                    self.debt_to_equity_ratio,
+                    self.dividend_yield,
+                    self.earnings_per_diluted_share,
+                    self.gross_profit,
+                    self.net_income,
+                    self.price_to_earnings_ratio,
+                    self.revenues_usd,
+                    self.id,
+                    self.filename
+                    ]
             #Setup UI widgets
             #Labels
             self.idLabel = Label(master, text="ID")
@@ -92,15 +115,15 @@ def transactionWindow():
             self.revenues_usdLabel = Label(master, text="Revenues in USD")
             self.revenues_usdLabel.place(x=10,y=610)
             #Buttons
-            self.helpButton = Button(master, text="Help", command=helpClicked)
+            self.helpButton = Button(master, text="Help", command=helpClicked(self))
             self.helpButton.place(x=700,y=10)
-            self.addButton = Button(master, text="Add", command=addClicked)
+            self.addButton = Button(master, text="Add", command=lambda args = self.args: addClicked(args))
             self.addButton.place(x=700,y=50)
-            self.removeButton = Button(master, text="Remove", command=removeClicked)
+            self.removeButton = Button(master, text="Remove",command=lambda args = self.args: removeClicked(args))
             self.removeButton.place(x=700,y=90)
-            self.populateButton = Button(master, text="Populate", command=populateClicked)
+            self.populateButton = Button(master, text="Populate", command=lambda args = self.args: populateClicked(args))
             self.populateButton.place(x=700,y=130)
-            self.updateButton = Button(master, text="Update", command=updateClicked)
+            self.updateButton = Button(master, text="Update", command=lambda args = self.args: updateClicked(args))
             self.updateButton.place(x=700,y=170)
             #Text boxes
             self.idEntry = Entry(master, width=50,textvariable=self.id)
